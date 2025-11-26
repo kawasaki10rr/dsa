@@ -3,10 +3,10 @@
 int main() {
     int window, frames;
 
-    printf("Enter window size: ");
+    printf("Enter window size: "); // io - 3
     scanf("%d", &window);
 
-    printf("Enter number of frames to send: ");
+    printf("Enter number of frames to send: "); // io - 6
     scanf("%d", &frames);
 
     int i = 1; 
