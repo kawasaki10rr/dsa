@@ -1,47 +1,64 @@
 #include <stdio.h>
+#define INF 9999
 
-#define INF 999
-#define MAX 10
+struct Edge {
+    int u, v, w;
+};
 
 int main() {
-    int n, cost[MAX][MAX], dist[MAX][MAX], nextHop[MAX][MAX];
-    int i, j, k, updated;
+    int n, e, src;
+    struct Edge edges[50];
+    int dist[50];
 
     printf("Enter number of nodes: ");
     scanf("%d", &n);
 
-    printf("Enter cost matrix (use %d for no link):\n", INF);
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
-            scanf("%d", &cost[i][j]);
-            if (i == j) cost[i][j] = 0;
-            dist[i][j] = cost[i][j];
-            nextHop[i][j] = j;     
-        }
-    }
-    
-    do {
-        updated = 0;
-        for (i = 0; i < n; i++) {
-            for (j = 0; j < n; j++) {
-                for (k = 0; k < n; k++) {
-                    if (dist[i][j] > cost[i][k] + dist[k][j]) {
-                        dist[i][j] = cost[i][k] + dist[k][j];
-                        nextHop[i][j] = k;   
-                        updated = 1;
-                    }
-                }
-            }
-        }
-    } while (updated);
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
 
-    printf("\n--- Final Distance Vector Table ---\n");
-    for (i = 0; i < n; i++) {
-        printf("\nRouter %d:\n", i + 1);
-        printf("Dest\tCost\tNextHop\n");
-        for (j = 0; j < n; j++) {
-            printf("%d\t%d\t%d\n", j + 1, dist[i][j], nextHop[i][j] + 1);
+    printf("Enter edges (u v weight):\n");
+    for (int i = 0; i < e; i++)
+        scanf("%d %d %d", &edges[i].u, &edges[i].v, &edges[i].w);
+
+    printf("Enter source node: ");
+    scanf("%d", &src);
+
+    // initialize distances
+    for (int i = 0; i < n; i++)
+        dist[i] = INF;
+    dist[src] = 0;
+
+    // relax edges n-1 times
+    for (int k = 1; k <= n - 1; k++)
+        for (int i = 0; i < e; i++)
+            if (dist[edges[i].u] != INF &&
+                dist[edges[i].v] > dist[edges[i].u] + edges[i].w)
+                dist[edges[i].v] = dist[edges[i].u] + edges[i].w;
+
+    // check for negative cycle
+    for (int i = 0; i < e; i++)
+        if (dist[edges[i].u] != INF &&
+            dist[edges[i].v] > dist[edges[i].u] + edges[i].w) {
+            printf("\nNegative cycle detected!\n");
+            return 0;
         }
-    }
+
+    printf("\nShortest distances from source %d:\n", src);
+    for (int i = 0; i < n; i++)
+        printf("Node %d : %d\n", i, dist[i]);
+
     return 0;
 }
+/*  
+Enter number of nodes: 5
+Enter number of edges: 7
+Enter edges (u v weight):
+0 1 6
+0 2 7
+1 2 8
+1 3 5
+1 4 -4
+2 3 -3
+3 4 9
+Enter source node: 0
+*/
