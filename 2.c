@@ -1,28 +1,51 @@
 #include <stdio.h>
 #include <string.h>
 
+char data[100], div[30];
+int datalen, divlen;
+
+void check() {
+    int limit = datalen - divlen + 1; 
+    for (int i = 0; i < limit; i++) {
+        if (data[i] == '1') {
+            for (int j = 0; j < divlen; j++)
+                data[i + j] = (data[i + j] == div[j]) ? '0' : '1';
+        }
+    }
+}
+
 int main() {
-    char data[500], poly[100], crc[600];
+    char og_data[100];
 
-    printf("Enter data bits: ");
-    scanf("%499s", data);
-    printf("Enter generator polynomial: ");
-    scanf("%99s", poly);
+    printf("Enter Data: ");
+    scanf("%s", data);
+    printf("Enter Divisor: ");
+    scanf("%s", div);
+    
+    datalen = strlen(data);
+    divlen = strlen(div);
+    strcpy(og_data, data);
 
-    int d = strlen(data), p = strlen(poly);
+    
+    for (int i = 0; i < divlen - 1; i++) strcat(data, "0");
+    datalen = strlen(data);  
+    check();
+    printf("CRC (Remainder): %s\n", data + datalen - (divlen - 1));
+    printf("Transmitted Frame: %s%s\n", og_data, data + datalen - (divlen - 1));
 
-    strcpy(crc, data);
-    for (int i = 0; i < p - 1; i++)
-        crc[d + i] = '0';
-    crc[d + p - 1] = '\0';
+  
+    printf("\nEnter Received Data: ");
+    scanf("%s", data); 
+    
+    datalen = strlen(data);  
+    check();
 
-    for (int i = 0; i < d; i++)
-        if (crc[i] == '1')
-            for (int j = 0; j < p; j++)
-                crc[i + j] = (crc[i + j] == poly[j]) ? '0' : '1';
+    int error = 0;
+    for (int i = 0; i < datalen; i++)
+        if (data[i] == '1') error = 1;
 
-    printf("CRC remainder: %.*s\n", p - 1, crc + d);
-    printf("Transmitted frame: %s%.*s\n", data, p - 1, crc + d);
+    if (error) printf("Error Detected\n");
+    else printf("No Error\n");
 
     return 0;
 }
