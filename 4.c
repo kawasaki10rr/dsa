@@ -1,43 +1,50 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define SUCCESS 1
+#define LOST 0
 
 int main() {
-    int window, frames;
+    int total_frames, window_size;
+    int next_frame = 1;
 
-    printf("Enter window size: "); // io - 3
-    scanf("%d", &window);
+    printf("Enter total number of frames: ");
+    scanf("%d", &total_frames);
 
-    printf("Enter number of frames to send: "); // io - 6
-    scanf("%d", &frames);
+    printf("Enter window size: ");
+    scanf("%d", &window_size);
 
-    int i = 1; 
+    srand(time(NULL)); 
 
-    while (i <= frames) {
-        printf("\nSending frames: ");
-        for (int j = i; j < i + window && j <= frames; j++) {
-            printf("%d ", j);
+    while (next_frame <= total_frames) {
+
+        int end_frame = next_frame + window_size - 1;
+        if (end_frame > total_frames)
+            end_frame = total_frames;
+
+        printf("\nSender: Sending frames %d to %d\n", next_frame, end_frame);
+
+        int lost_frame = -1;
+        for (int i = next_frame; i <= end_frame; i++) {
+            if (rand() % 10 < 3) {  
+                lost_frame = i;
+                break;
+            }
         }
 
-        printf("\nWaiting for ACK (cumulative)...\n");
-
-        int ack;
-        printf("Enter last ACK received: ");
-        scanf("%d", &ack);
-
-        
-        if (ack < i - 1 || ack > frames || ack > i + window - 1) {
-            printf("Invalid ACK value. Please enter a valid ACK within the current window.\n");
-            continue; 
-        }
-
-        if (ack < i) {
-            printf("ACK not received properly… Resending window\n");
-          
+        if (lost_frame != -1) {
+            printf("Receiver: Frame %d LOST!\n", lost_frame);
+            printf("Receiver: ACK %d sent (Go-Back-N triggered) \n", next_frame - 1);
+            printf("Sender: Resending from frame %d...\n", next_frame);
         } else {
-           
-            i = ack + 1;
+            printf("Receiver: All frames %d to %d received successfully. \n", 
+                   next_frame, end_frame);
+            printf("Receiver: Sending ACK %d\n", end_frame);
+            next_frame = end_frame + 1;
         }
     }
 
-    printf("\nAll frames sent successfully.\n");
+    printf("\nAll frames sent successfully!\n");
     return 0;
 }
